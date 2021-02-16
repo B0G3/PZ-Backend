@@ -11,6 +11,6 @@ class UserSchema(ma.Schema):
     class Meta:
         model = User
         ordered = True
-        fields = ("id", "email", "password", "firstname",
-                  "surname", "created_at", "is_admin")
+        fields = ("id", "email", "password", "firstname", "surname",
+                  "sex", "active", "created_at", "updated_at")
         dateformat = '%Y-%m-%d %H:%M:%S%z'
