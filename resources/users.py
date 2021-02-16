@@ -42,13 +42,13 @@ class LoginApi(Resource):
         if not username or not password:
             return jsonify({"msg": "Missing username or password parameter"})
 
-        # Because we lack models and proper database yet, I use 'test' as a username
-        # and as a password
+        # Because we lack models and proper database yet, I use 'test' as a
+        # username and as a password
         if username != 'test' or password != 'test':
             return jsonify({"msg": "Wrong username or password"})
 
         access_token = create_access_token(identity=username)
-        return jsonify({"access_token": access_token}), 200
+        return jsonify({"access_token": access_token})
 
 
 class ProtectedApi(Resource):
