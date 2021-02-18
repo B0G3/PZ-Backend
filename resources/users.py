@@ -193,7 +193,7 @@ class ProtectedApi(Resource):
             }
         }
     })
-    @jwt_required
+    @jwt_required()
     def get(self):
         """Check if user is authorized"""
         current_user = get_jwt_identity()
