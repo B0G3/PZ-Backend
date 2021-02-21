@@ -46,6 +46,7 @@ class Institution(Schema):
     }
     required = ['name', 'city', 'address', 'contact_number']
 
+
 class Role(Schema):
     type = 'object'
     description = 'Must provide these when creating new role'
@@ -55,3 +56,4 @@ class Role(Schema):
         },
     }
     required = ['title']
+
