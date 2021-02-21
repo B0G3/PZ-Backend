@@ -1,6 +1,6 @@
 from flask import Response, request, jsonify, make_response, json
-from database.models import Role, user_roles
-from .schemas import RoleSchema
+from database.models import Role, User, user_roles
+from .schemas import RoleSchema, UserRoleSchema
 from database.db import db
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
@@ -8,9 +8,13 @@ from flask_jwt_extended import (
 )
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import Role as RoleSwaggerModel
+from .swagger_models import UserRole as UserRoleSwaggerModel
 
 role_schema = RoleSchema()
 roles_schema = RoleSchema(many=True)
+
+user_role_schema = UserRoleSchema()
+user_roles_schema = UserRoleSchema(many=True)
 
 class RolesApi(Resource):
     @swagger.doc({
@@ -127,3 +131,97 @@ class RoleApi(Resource):
         db.session.commit()
 
         return jsonify({'msg': 'Successfully removed role'})
+
+class UserRolesApi(Resource):
+    @swagger.doc({
+        'tags': ['userrole'],
+        'description': 'Returns ALL the user roles',
+        'responses': {
+            '200': {
+                'description': 'Successfully got all the userroles',
+            }
+        }
+    })
+    def get(self, userid):
+        user = User.query.get(userid)
+        if user is None:
+            return jsonify({'msg': 'User doesnt exist'})
+
+        roles = user_roles_schema.dump(user.roles)
+        return jsonify(roles)
+
+class UserRoleApi(Resource):
+    @swagger.doc({
+        'tags': ['userrole'],
+        'description': 'Gives user a role',
+        'parameters': [
+            {
+                'name': 'Body',
+                'in': 'body',
+                'schema': UserRoleSwaggerModel,
+                'type': 'object',
+                'required': 'true'
+            },
+        ],
+        'responses': {
+            '200': {
+                'description': 'Successfully added role to an user',
+            }
+        }
+    })
+    def post(self):
+        """Add role to an user"""
+        r_id = request.json['role_id']
+        u_id = request.json['user_id']
+
+        user = User.query.get(u_id)
+        if user is None:
+            return jsonify({'msg': 'User doesnt exist'})
+        role = Role.query.get(r_id)
+        if role is None:
+            return jsonify({'msg': 'Role doesnt exist'})
+
+        if(role in user.roles):
+            return jsonify({'msg': 'User already has this role'})
+
+        user.roles.append(role)
+        db.session.commit()
+
+        return jsonify({'msg': 'Successfully added role to the user'})
+
+    @swagger.doc({
+        'tags': ['userrole'],
+        'description': 'Removes role from user',
+        'parameters': [
+            {
+                'name': 'Body',
+                'in': 'body',
+                'schema': UserRoleSwaggerModel,
+                'type': 'object',
+                'required': 'true'
+            },
+        ],
+        'responses': {
+            '200': {
+                'description': 'Successfully removed role from the user',
+            }
+        }
+    })
+    def delete(self):
+        """Delete role from the user"""
+        r_id = request.json['role_id']
+        u_id = request.json['user_id']
+
+        user = User.query.get(u_id)
+        if user is None:
+            return jsonify({'msg': 'User doesnt exist'})
+        role = Role.query.get(r_id)
+        if role is None:
+            return jsonify({'msg': 'Role doesnt exist'})
+
+        if(role in user.roles):
+            result = user.roles.remove(role)
+            db.session.commit()
+            return jsonify({'msg': 'Role removed'})
+        else:
+            return jsonify({'msg': 'User doesnt have selected role'})

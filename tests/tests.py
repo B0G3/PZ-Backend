@@ -5,12 +5,12 @@ import flask_restful
 from flask import Flask
 
 from app import app
-
+import config
 
 class Testing(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        app.config['TESTING'] = True
+        app.config.from_object('config.TestingConfig')
         # TODO: dodac obsluge bazy danych tutaj
         # w przypadku testowania trzeba korzystac z osobnej bazy
         # ktora sie czysci po kazdym uruchomieniu testow
@@ -25,9 +25,6 @@ class Testing(unittest.TestCase):
         self.baseURL = "http://localhost:5000"
         pass
 
-    def test_flask_app(self):
-        rv = self.client.get('/user')
-        assert rv.status_code == 200
     def test_get_user_route(self):
         response = self.app.get('/user')
         self.assertEqual(200, response.status_code)

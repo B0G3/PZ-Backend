@@ -57,3 +57,16 @@ class Role(Schema):
     }
     required = ['title']
 
+class UserRole(Schema):
+    type = 'object'
+    description = 'Must provide these when adding role to an user'
+    properties = {
+        'role_id': {
+            'type': 'integer'
+        },
+        'user_id': {
+            'type': 'integer'
+        },
+    }
+    required = ['role_id', 'user_id']
+

@@ -25,3 +25,9 @@ class RoleSchema(ma.Schema):
         model = Role
         ordered = True
         fields = ("id", "title", "created_at", "updated_at")
+
+class UserRoleSchema(ma.Schema):
+    class Meta:
+        model = Role
+        ordered = True
+        fields = ("role_id", "user_id")

@@ -34,8 +34,7 @@ class User(db.Model):
                            default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=db.func.current_timestamp())
-    roles = db.relationship('Role', secondary=user_roles, lazy='subquery',
-    backref=db.backref('users', lazy=True))
+    roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy='dynamic'))
 
     def __init__(self, email, password, firstname, surname, sex, active, created_at, updated_at):
         self.email = email
