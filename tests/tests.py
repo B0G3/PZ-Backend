@@ -7,6 +7,7 @@ from flask import Flask
 from app import app
 import config
 
+
 class Testing(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
@@ -17,12 +18,6 @@ class Testing(unittest.TestCase):
         # zrobic to dopiero po ogarnieciu poszczegolnych konfiguracji
 
     def tearDown(self):
-        pass
-
-    def create_app(self):
-        self.app = Flask(__name__)
-        self.app.config['TESTING'] = True
-        self.baseURL = "http://localhost:5000"
         pass
 
     def test_get_user_route(self):
