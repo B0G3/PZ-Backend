@@ -1,10 +1,11 @@
 from flask_marshmallow import Marshmallow
 from database.db import db
-from database.models import User, Institution, Role
+from database.models import User, Institution, Role, Group
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 ma = Marshmallow()
+
 
 class UserSchema(ma.Schema):
     class Meta:
@@ -26,8 +27,15 @@ class RoleSchema(ma.Schema):
         ordered = True
         fields = ("id", "title", "created_at", "updated_at")
 
-class UserRoleSchema(ma.Schema):
+
+class GroupSchema(ma.Schema):
     class Meta:
         model = Role
         ordered = True
-        fields = ("role_id", "user_id")
+        fields = ("id", "name", "created_at", "updated_at")
+
+# class UserRoleSchema(ma.Schema):
+#     class Meta:
+#         model = UserRole
+#         ordered = True
+#         fields = ("role_id", "user_id")

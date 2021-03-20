@@ -4,16 +4,19 @@ from .schemas import UserSchema
 from database.db import db
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+    get_jwt_identity, current_user
 )
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import User as UserSwaggerModel
+from .swagger_models import Login as LoginSwaggerModel
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 
 class UsersApi(Resource):
+    # NOTE: Nizej pokazane jak wyglada autoryzacja
+    # dla poszczegolnych endpointow
     @swagger.doc({
         'tags': ['user'],
         'description': 'Returns ALL the users',
@@ -21,8 +24,14 @@ class UsersApi(Resource):
             '200': {
                 'description': 'Successfully got all the users',
             }
-        }
+        },
+        'security': [
+            {
+                'api_key': []
+            }
+        ]
     })
+    @jwt_required()
     def get(self):
         """Return ALL the users"""
         all_users = User.query.all()
@@ -75,6 +84,23 @@ class UsersApi(Resource):
 class UserApi(Resource):
 
     # GET single user with given id
+    @swagger.doc({
+        'tags': ['user'],
+        'description': 'Returns specific user',
+        'parameters': [
+            {
+                'name': 'id',
+                'in': 'path',
+                'type': 'integer',
+                'required': 'true'
+            },
+        ],
+        'responses': {
+            '200': {
+                'description': 'Successfully updated user',
+            }
+        }
+    })
     def get(self, id):
         single_user = User.query.get(id)
 
@@ -87,6 +113,12 @@ class UserApi(Resource):
         'tags': ['user'],
         'description': 'Updates an user',
         'parameters': [
+            {
+                'name': 'id',
+                'in': 'path',
+                'type': 'integer',
+                'required': 'true'
+            },
             {
                 'name': 'Body',
                 'in': 'body',
@@ -104,6 +136,8 @@ class UserApi(Resource):
     def put(self, id):
         """Update user"""
         user = User.query.get(id)
+        if not user:
+            return jsonify({'msg': 'No user found'})
 
         # TODO: Maybe we can update certain user without specifying
         # all the data and provide only the thing we are about to change?
@@ -149,19 +183,36 @@ class UserApi(Resource):
     def delete(self, id):
         """Delete user"""
         user = db.session.query(User).filter(User.id == id).first()
+        if not user:
+            return jsonify({'msg': 'No user found'})
+        
         db.session.delete(user)
         db.session.commit()
 
-        # Return all the other users
-        # TODO: This is only temporarily for development, change this
-        # to returning successful message only
-        all_users = User.query.all()
-        result = users_schema.dump(all_users)
-        return jsonify(result)
+        return jsonify({"msg": "Successfully deleted user"})
 
 
 class LoginApi(Resource):
+    @swagger.doc({
+        'tags': ['login'],
+        'description': 'Logs in',
+        'parameters': [
+            {
+                'name': 'Body',
+                'in': 'body',
+                'schema': LoginSwaggerModel,
+                'type': 'object',
+                'required': 'true'
+            },
+        ],
+        'responses': {
+            '200': {
+                'description': 'Successfully logged in',
+            }
+        }
+    })
     def post(self):
+        """Endpoint to get the token"""
         username = request.json['username']
         password = request.json['password']
 
@@ -181,6 +232,13 @@ class ProtectedApi(Resource):
     @swagger.doc({
         'tags': ['protected'],
         'description': 'Protected endpoint for testing only',
+        'parameters': [
+            {
+                'name': 'Authorization',
+                'in': 'header',
+                'type': 'string'
+            }
+        ],
         'produces': [
             'application/json'
         ],
@@ -198,4 +256,3 @@ class ProtectedApi(Resource):
         """Check if user is authorized"""
         current_user = get_jwt_identity()
         return jsonify({"msg": "Access granted"})
-        # return jsonify(current_user), 201
