@@ -31,14 +31,14 @@ class Login(Schema):
     type = 'object'
     description = 'Must provide these when loggin in'
     properties = {
-        'username': {
+        'email': {
             'type': 'string'
         },
         'password': {
             'type': 'string'
         },
     }
-    required = ['username', 'password']
+    required = ['email', 'password']
 
 
 class Institution(Schema):

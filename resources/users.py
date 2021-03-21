@@ -185,7 +185,7 @@ class UserApi(Resource):
         user = db.session.query(User).filter(User.id == id).first()
         if not user:
             return jsonify({'msg': 'No user found'})
-        
+
         db.session.delete(user)
         db.session.commit()
 
@@ -213,19 +213,22 @@ class LoginApi(Resource):
     })
     def post(self):
         """Endpoint to get the token"""
-        username = request.json['username']
+        email = request.json['email']
         password = request.json['password']
 
-        if not username or not password:
-            return jsonify({"msg": "Missing username or password parameter"})
+        if not email or not password:
+            return jsonify({"msg": "Missing email or password parameter"})
 
-        # Because we lack models and proper database yet, I use 'test' as a
-        # username and as a password
-        if username != 'test' or password != 'test':
-            return jsonify({"msg": "Wrong username or password"})
+        user = User.query.filter_by(email=email).first()
 
-        access_token = create_access_token(identity=username)
-        return jsonify({"access_token": access_token})
+        if not user:
+            return jsonify({"msg": "No user with given email"})
+
+        if user.password == password:
+            access_token = create_access_token(identity=email)
+            return jsonify({"access_token": access_token})
+        else:
+            return jsonify({"msg": "Wrong password!"})
 
 
 class ProtectedApi(Resource):
