@@ -119,6 +119,9 @@ class GroupApi(Resource):
         """Update group"""
         group = Group.query.get(id)
 
+        if not group:
+            return jsonify({'msg': 'No group found'})
+
         name = request.json['name']
         updated_at = db.func.current_timestamp()
 
@@ -151,6 +154,10 @@ class GroupApi(Resource):
     def delete(self, id):
         """Delete group"""
         group = db.session.query(Group).filter(Group.id == id).first()
+
+        if not group:
+            return jsonify({'msg': 'No group found'})
+            
         db.session.delete(group)
         db.session.commit()
 

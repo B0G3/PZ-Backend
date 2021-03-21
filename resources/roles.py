@@ -119,6 +119,9 @@ class RoleApi(Resource):
         """Update role"""
         role = Role.query.get(id)
 
+        if not role:
+            return jsonify({'msg': 'No role found'})
+
         title = request.json['title']
         updated_at = db.func.current_timestamp()
 
@@ -151,6 +154,10 @@ class RoleApi(Resource):
     def delete(self, id):
         """Delete role"""
         role = db.session.query(Role).filter(Role.id == id).first()
+
+        if not role:
+            return jsonify({'msg': 'No role found'})
+
         db.session.delete(role)
         db.session.commit()
 

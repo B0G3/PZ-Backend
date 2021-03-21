@@ -114,6 +114,12 @@ class UserApi(Resource):
         'description': 'Updates an user',
         'parameters': [
             {
+                'name': 'id',
+                'in': 'path',
+                'type': 'integer',
+                'required': 'true'
+            },
+            {
                 'name': 'Body',
                 'in': 'body',
                 'schema': UserSwaggerModel,
@@ -130,6 +136,8 @@ class UserApi(Resource):
     def put(self, id):
         """Update user"""
         user = User.query.get(id)
+        if not user:
+            return jsonify({'msg': 'No user found'})
 
         # TODO: Maybe we can update certain user without specifying
         # all the data and provide only the thing we are about to change?
@@ -175,15 +183,13 @@ class UserApi(Resource):
     def delete(self, id):
         """Delete user"""
         user = db.session.query(User).filter(User.id == id).first()
+        if not user:
+            return jsonify({'msg': 'No user found'})
+        
         db.session.delete(user)
         db.session.commit()
 
-        # Return all the other users
-        # TODO: This is only temporarily for development, change this
-        # to returning successful message only
-        all_users = User.query.all()
-        result = users_schema.dump(all_users)
-        return jsonify(result)
+        return jsonify({"msg": "Successfully deleted user"})
 
 
 class LoginApi(Resource):
