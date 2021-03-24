@@ -32,21 +32,3 @@ class TestBase(unittest.TestCase):
 
         self.app_context.pop()
         pass
-<<<<<<< HEAD
-=======
-
-    def test_unauthorized_protected_route(self):
-        response = self.app.get('/protected')
-        data = json.loads(response.get_data(as_text=True))
-
-        self.assertEqual(data['msg'], "Missing Authorization Header")
-        self.assertEqual(401, response.status_code)
-
-
-    #GROUP
-
-
-    def test_get_group_route(self):
-        response = self.app.get('/group', headers = self.header)
-        self.assertEqual(200, response.status_code)
->>>>>>> ad828849c4d10f7cd3f5544db84da11c7d027edc

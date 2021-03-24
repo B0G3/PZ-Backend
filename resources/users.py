@@ -10,6 +10,7 @@ from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import User as UserSwaggerModel
 from .swagger_models import Login as LoginSwaggerModel
 from flask_sqlalchemy import SQLAlchemy
+from .security import generate_salt, generate_hash
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -68,7 +69,10 @@ class UsersApi(Resource):
         created_at = db.func.current_timestamp()
         updated_at = db.func.current_timestamp()
 
-        new_user = User(email, password, firstname, surname, sex, active,
+        salt_str = generate_salt(16)
+        key = generate_hash(password, salt_str)
+
+        new_user = User(email, key, salt_str, firstname, surname, sex, active,
                         created_at, updated_at)
 
         # Check if user with given email already exists
@@ -155,8 +159,12 @@ class UserApi(Resource):
         active = request.json['active']
         updated_at = db.func.current_timestamp()
 
+        salt_str = generate_salt(16)
+        key = generate_hash(password, salt_str)
+
         user.email = email
-        user.password = password
+        user.password = key
+        user.salt = salt_str
         user.firstname = firstname
         user.surname = surname
         user.sex = sex
@@ -191,11 +199,6 @@ class UserApi(Resource):
         user = db.session.query(User).filter(User.id == id).first()
         if not user:
             return jsonify({'msg': 'No user found'})
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> ad828849c4d10f7cd3f5544db84da11c7d027edc
         db.session.delete(user)
         db.session.commit()
 
@@ -234,7 +237,10 @@ class LoginApi(Resource):
         if not user:
             return jsonify({"msg": "No user with given email"})
 
-        if user.password == password:
+        salt = user.salt
+        key = generate_hash(password, salt)
+
+        if user.password == key:
             access_token = create_access_token(identity=email)
             return jsonify({"access_token": access_token})
         else:

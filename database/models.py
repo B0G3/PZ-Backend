@@ -34,7 +34,8 @@ class Role(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(40), nullable=False)
-    password = db.Column(db.String(40), nullable=False)
+    password = db.Column(db.String(64), nullable=False)
+    salt = db.Column(db.String(16), nullable=False)
     firstname = db.Column(db.String(20), nullable=False)
     surname = db.Column(db.String(40), nullable=False)
     sex = db.Column(db.Integer, nullable=False)
@@ -50,9 +51,10 @@ class User(db.Model):
     activity = db.relationship(
         'Activity', backref='user', lazy=True, uselist=False)
 
-    def __init__(self, email, password, firstname, surname, sex, active, created_at, updated_at):
+    def __init__(self, email, password, salt, firstname, surname, sex, active, created_at, updated_at):
         self.email = email
         self.password = password
+        self.salt = salt
         self.firstname = firstname
         self.surname = surname
         self.sex = sex
