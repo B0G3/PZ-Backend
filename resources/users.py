@@ -1,5 +1,5 @@
 from flask import Response, request, jsonify, make_response, json
-from database.models import User
+from database.models import User, Activity
 from .schemas import UserSchema
 from database.db import db
 from flask_jwt_extended import (
@@ -9,6 +9,7 @@ from flask_jwt_extended import (
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import User as UserSwaggerModel
 from .swagger_models import Login as LoginSwaggerModel
+from flask_sqlalchemy import SQLAlchemy
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -76,6 +77,11 @@ class UsersApi(Resource):
             return jsonify({'msg': 'User with given email address already exists'})
 
         db.session.add(new_user)
+
+        # Now create an empty activity for the user
+        new_activity = Activity(0, 0)
+        new_user.activity = new_activity
+
         db.session.commit()
 
         return user_schema.jsonify(new_user)
@@ -185,7 +191,11 @@ class UserApi(Resource):
         user = db.session.query(User).filter(User.id == id).first()
         if not user:
             return jsonify({'msg': 'No user found'})
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> ad828849c4d10f7cd3f5544db84da11c7d027edc
         db.session.delete(user)
         db.session.commit()
 
@@ -213,19 +223,22 @@ class LoginApi(Resource):
     })
     def post(self):
         """Endpoint to get the token"""
-        username = request.json['username']
+        email = request.json['email']
         password = request.json['password']
 
-        if not username or not password:
-            return jsonify({"msg": "Missing username or password parameter"})
+        if not email or not password:
+            return jsonify({"msg": "Missing email or password parameter"})
 
-        # Because we lack models and proper database yet, I use 'test' as a
-        # username and as a password
-        if username != 'test' or password != 'test':
-            return jsonify({"msg": "Wrong username or password"})
+        user = User.query.filter_by(email=email).first()
 
-        access_token = create_access_token(identity=username)
-        return jsonify({"access_token": access_token})
+        if not user:
+            return jsonify({"msg": "No user with given email"})
+
+        if user.password == password:
+            access_token = create_access_token(identity=email)
+            return jsonify({"access_token": access_token})
+        else:
+            return jsonify({"msg": "Wrong password!"})
 
 
 class ProtectedApi(Resource):

@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_restful import Api
 
 from database.db import db, init_db
+from scheduler import scheduler
 from resources.routes import initialize_routes
 from flask_jwt_extended import JWTManager
 
@@ -26,7 +27,6 @@ domyślnie były rozwinięte to usuwamy `docExpansion=none&`. \
 \n\n **Ważne!** Autoryzujemy na endpoincie `/login` a następnie wklejamy nasz token \
 do okienka **Authorize**. Po wpisaniu dobrego tokenu możemy w całości korzystać z API. 
 """
-
 #App factory
 def create_app(cfg):
 	app = Flask(__name__)
@@ -50,4 +50,5 @@ def create_app(cfg):
 	init_db(app)
 	initialize_routes(api)
 	return app
+
 

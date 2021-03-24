@@ -31,14 +31,14 @@ class Login(Schema):
     type = 'object'
     description = 'Must provide these when loggin in'
     properties = {
-        'username': {
+        'email': {
             'type': 'string'
         },
         'password': {
             'type': 'string'
         },
     }
-    required = ['username', 'password']
+    required = ['email', 'password']
 
 
 class Institution(Schema):
@@ -109,3 +109,17 @@ class UserGroup(Schema):
         },
     }
     required = ['group_id', 'user_id']
+
+
+class Activity(Schema):
+    type = 'object'
+    description = 'Must provide these when editing user\'s activity'
+    properties = {
+        'sleep': {
+            'type': 'integer'
+        },
+        'food_scale': {
+            'type': 'integer'
+        },
+    }
+    required = ['sleep', 'food_scale']
