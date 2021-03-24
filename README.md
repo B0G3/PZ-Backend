@@ -21,11 +21,15 @@ python run.py
 
 ### Testy
 
-Póki co testy są na `unittest` i w jednym pliku, bo to tylko baza, ale potem można to podzielić na różne moduły (i nawet na inną bibliotekę)
+Do testów używamy `unittest`. Testy podzielone są na kilka plików.
 
-Uruchamianie:
+Uruchamianie (wszystkie testy na raz):
 ```
-python -m unittest tests/tests.py
+python -m unittest discover tests
+```
+Uruchamianie (pojedynczego przykladowego testu):
+```
+python -m unittest tests/test_users.py
 ```
 
 ### Kontrybucje
