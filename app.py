@@ -49,6 +49,8 @@ def create_app(cfg):
 
 	init_db(app)
 	initialize_routes(api)
+	scheduler.init_app(app)
+	scheduler.start()
 	return app
 
 
