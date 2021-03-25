@@ -2,6 +2,7 @@ from .users import UserApi, UsersApi, LoginApi, ProtectedApi
 from .institutions import InstitutionsApi, InstitutionApi
 from .roles import RolesApi, RoleApi, UserRoleApi, UserRolesApi
 from .groups import GroupApi, GroupsApi, UserGroupsApi, UserGroupApi
+from .activities import ActivitiesApi, ActivityApi
 
 def initialize_routes(api):
     api.add_resource(UsersApi, '/user')
@@ -9,6 +10,9 @@ def initialize_routes(api):
 
     api.add_resource(InstitutionsApi, '/institution')
     api.add_resource(InstitutionApi, '/institution/<id>')
+
+    api.add_resource(ActivitiesApi, '/activity')
+    api.add_resource(ActivityApi, '/activity/<id>')
 
     api.add_resource(RolesApi, '/role')
     api.add_resource(RoleApi, '/role/<id>')
