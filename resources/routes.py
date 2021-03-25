@@ -4,7 +4,6 @@ from .roles import RolesApi, RoleApi, UserRoleApi, UserRolesApi
 from .groups import GroupApi, GroupsApi, UserGroupsApi, UserGroupApi
 from .activities import ActivitiesApi, ActivityApi
 
-
 def initialize_routes(api):
     api.add_resource(UsersApi, '/user')
     api.add_resource(UserApi, '/user/<id>')
