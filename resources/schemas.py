@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 ma = Marshmallow()
 
-
 class UserSchema(ma.Schema):
     class Meta:
         model = User
@@ -27,13 +26,11 @@ class RoleSchema(ma.Schema):
         ordered = True
         fields = ("id", "title", "created_at", "updated_at")
 
-
 class GroupSchema(ma.Schema):
     class Meta:
         model = Role
         ordered = True
         fields = ("id", "name", "created_at", "updated_at")
-
 
 class ActivitySchema(ma.Schema):
     class Meta:
