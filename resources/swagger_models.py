@@ -123,3 +123,42 @@ class Activity(Schema):
         },
     }
     required = ['sleep', 'food_scale']
+
+class DishMenu(Schema):
+    type = 'object'
+    description = 'Must provide these when creating dish menu'
+    properties = {
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'institution_id': {
+            'type': 'integer'
+        },
+    }
+    required = ['date']
+
+class Dish(Schema):
+    type = 'object'
+    description = 'Must provide these when creating dish'
+    properties = {
+        'name': {
+            'type': 'string'
+        },
+        'description': {
+            'type': 'string'
+        },
+        'type': {
+            'type': 'string'
+        },
+        'institution_id': {
+            'type': 'integer'
+        },
+        'dishMenu_id': {
+            'type': 'integer'
+        },
+        'is_alternative': {
+            'type': 'integer'
+        }
+    }
+    required = ['name', 'type', 'institution_id', 'dishMenu_id', 'is_alternative']
