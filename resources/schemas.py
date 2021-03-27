@@ -1,11 +1,10 @@
 from flask_marshmallow import Marshmallow
 from database.db import db
-from database.models import User, Institution, Role, Group, Activity
+from database.models import User, Institution, Role, Group, Activity, Dish, DishMenu
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 ma = Marshmallow()
-
 
 class UserSchema(ma.Schema):
     class Meta:
@@ -27,13 +26,11 @@ class RoleSchema(ma.Schema):
         ordered = True
         fields = ("id", "title", "created_at", "updated_at")
 
-
 class GroupSchema(ma.Schema):
     class Meta:
         model = Role
         ordered = True
         fields = ("id", "name", "created_at", "updated_at")
-
 
 class ActivitySchema(ma.Schema):
     class Meta:
@@ -41,8 +38,14 @@ class ActivitySchema(ma.Schema):
         ordered = True
         fields = ("id", "sleep", "food_scale", "user_id")
 
-# class UserRoleSchema(ma.Schema):
-#     class Meta:
-#         model = UserRole
-#         ordered = True
-#         fields = ("role_id", "user_id")
+class DishSchema(ma.Schema):
+    class Meta:
+        model = Dish
+        ordered = True
+        fields = ("id", "name", "description", "type", "institution_id", "dishMenu_id", "is_alternative")
+
+class DishMenuSchema(ma.Schema):
+    class Meta:
+        model = DishMenu
+        ordered = True
+        fields = ("id", "date", "institution_id")

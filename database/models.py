@@ -69,6 +69,8 @@ class Institution(db.Model):
     city = db.Column(db.String(45), nullable=False)
     address = db.Column(db.String(128), nullable=False)
     contact_number = db.Column(db.String(15), nullable=False)
+    dishes = db.relationship('Dish', cascade="all,delete", backref='institution')
+    dishMenus = db.relationship('DishMenu', cascade="all,delete", backref='institution')
 
     def __init__(self, name, city, address, contact_number):
         self.name = name
@@ -101,3 +103,31 @@ class Activity(db.Model):
         self.sleep = sleep
         self.food_scale = food_scale
         # self.user_id = user_id
+
+class DishMenu(db.Model):
+    __tablename__ = 'dishmenu'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False,
+                           default=db.func.current_timestamp())
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
+    dishes = db.relationship('Dish', cascade="all,delete", backref='DishMenu')
+    def __init__(self, date, institution_id):
+        self.date = date
+        self.institution_id = institution_id
+
+class Dish(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(45), nullable=False)
+    description = db.Column(db.String(128), nullable=True)
+    type = db.Column(db.String(45), nullable=False)
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
+    dishMenu_id = db.Column(db.Integer, db.ForeignKey('dishmenu.id'))
+    is_alternative = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, name, description, type, institution_id, dishMenu_id, is_alternative):
+        self.name = name
+        self.description = description
+        self.type = type
+        self.institution_id = institution_id
+        self.dishMenu_id = dishMenu_id
+        self.is_alternative = is_alternative
