@@ -16,9 +16,9 @@ class UserSchema(ma.Schema):
         model = User
         ordered = True
         fields = ("id", "email", "password", "salt", "firstname", "surname",
-                  "sex", "active", "created_at", "updated_at")
+                  "sex", "active", "created_at", "updated_at", "roles")
         dateformat = '%Y-%m-%d %H:%M:%S%z'
-
+    roles = ma.Nested('RoleSchema', many=True)
 
 class InstitutionSchema(ma.Schema):
     class Meta:

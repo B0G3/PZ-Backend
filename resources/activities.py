@@ -55,7 +55,7 @@ class ActivityApi(Resource):
             {
                 'name': 'id',
                 'in': 'path',
-                'description': 'Activity identifier',
+                'description': 'User identifier',
                 'type': 'integer'
             }
         ],
