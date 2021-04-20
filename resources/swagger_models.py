@@ -136,8 +136,11 @@ class DishMenu(Schema):
         'institution_id': {
             'type': 'integer'
         },
+        'dish_id': {
+            'type': 'integer'
+        },
     }
-    required = ['date']
+    required = ['date', 'institution_id', 'dish_id']
 
 
 class Dish(Schema):
@@ -156,15 +159,11 @@ class Dish(Schema):
         'institution_id': {
             'type': 'integer'
         },
-        'dishMenu_id': {
-            'type': 'integer'
-        },
         'is_alternative': {
             'type': 'integer'
         }
     }
-    required = ['name', 'type', 'institution_id',
-                'dishMenu_id', 'is_alternative']
+    required = ['name', 'type', 'institution_id', 'is_alternative']
 
 
 class Conversation(Schema):

@@ -116,11 +116,12 @@ class DishMenu(db.Model):
     date = db.Column(db.DateTime, nullable=False,
                      default=db.func.current_timestamp())
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
-    dishes = db.relationship('Dish', cascade="all,delete", backref='DishMenu')
+    dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
 
-    def __init__(self, date, institution_id):
+    def __init__(self, date, institution_id, dish_id):
         self.date = date
         self.institution_id = institution_id
+        self.dish_id = dish_id
 
 
 class Dish(db.Model):
@@ -129,15 +130,14 @@ class Dish(db.Model):
     description = db.Column(db.String(128), nullable=True)
     type = db.Column(db.String(45), nullable=False)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
-    dishMenu_id = db.Column(db.Integer, db.ForeignKey('dishmenu.id'))
     is_alternative = db.Column(db.Integer, nullable=False)
+    dishMenus = db.relationship('DishMenu', cascade="all,delete", backref='Dish')
 
-    def __init__(self, name, description, type, institution_id, dishMenu_id, is_alternative):
+    def __init__(self, name, description, type, institution_id, is_alternative):
         self.name = name
         self.description = description
         self.type = type
         self.institution_id = institution_id
-        self.dishMenu_id = dishMenu_id
         self.is_alternative = is_alternative
 
 
