@@ -56,18 +56,13 @@ class DishesApi(Resource):
         description = request.json['description']
         type_str = request.json['type']
         institution_id = request.json['institution_id']
-        dishMenu_id = request.json['dishMenu_id']
         is_alternative = request.json['is_alternative']
 
         institution = Institution.query.get(institution_id)
         if not institution:
             return jsonify({'msg': 'Institution does not exist'})
 
-        dishMenu = DishMenu.query.get(dishMenu_id)
-        if not dishMenu:
-            return jsonify({'msg': 'Dish menu does not exist'})
-
-        new_dish = Dish(name, description, type_str, institution_id, dishMenu_id, is_alternative)
+        new_dish = Dish(name, description, type_str, institution_id, is_alternative)
 
         db.session.add(new_dish)
         db.session.commit()
@@ -121,22 +116,16 @@ class DishApi(Resource):
         description = request.json['description']
         type_str = request.json['type']
         institution_id = request.json['institution_id']
-        dishMenu_id = request.json['dishMenu_id']
         is_alternative = request.json['is_alternative']
 
         institution = Institution.query.get(institution_id)
         if not institution:
             return jsonify({'msg': 'Institution does not exist'})
 
-        dishMenu = DishMenu.query.get(dishMenu_id)
-        if not dishMenu:
-            return jsonify({'msg': 'Dish menu does not exist'})
-
         dish.name = name
         dish.description = description
         dish.type = type_str
         dish.institution_id = institution_id
-        dish.dishMenu_id = dishMenu_id
         dish.is_alternative = is_alternative
 
         db.session.commit()
@@ -210,6 +199,7 @@ class DishMenusApi(Resource):
         """Add a new dish menu"""
         date_str = request.json['date']
         institution_id = request.json['institution_id']
+        dish_id = request.json['dish_id']
 
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
@@ -217,17 +207,18 @@ class DishMenusApi(Resource):
         if not institution:
             return jsonify({'msg': 'Institution does not exist'})
 
+        dish = Dish.query.get(dish_id)
+        if not dish:
+            return jsonify({'msg': 'Dish does not exist'})
 
-        new_dishMenu = DishMenu(date, institution_id)
+        new_dishMenu = DishMenu(date, institution_id, dish_id)
 
         db.session.add(new_dishMenu)
         db.session.commit()
 
         return dishMenu_schema.jsonify(new_dishMenu)
 
-
 class DishMenuApi(Resource):
-
     # GET single dish menu with given id
     def get(self, id):
         single_dishMenu = DishMenu.query.get(id)
@@ -270,16 +261,21 @@ class DishMenuApi(Resource):
 
         date_str = request.json['date']
         institution_id = request.json['institution_id']
+        dish_id = request.json['dish_id']
 
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        institution_id = request.json['institution_id']
 
         institution = Institution.query.get(institution_id)
         if not institution:
             return jsonify({'msg': 'Institution does not exist'})
 
+        dish = Dish.query.get(dish_id)
+        if not dish:
+            return jsonify({'msg': 'Dish does not exist'})
+
         dishMenu.date = date
         dishMenu.institution_id = institution_id
+        dishMenu.dish_id = dish_id
 
         db.session.commit()
         return dishMenu_schema.jsonify(dishMenu)
@@ -305,7 +301,7 @@ class DishMenuApi(Resource):
         }
     })
     def delete(self, id):
-        """Delete dish"""
+        """Delete dish menu"""
         dishMenu = db.session.query(DishMenu).filter(DishMenu.id == id).first()
         if not dishMenu:
             return jsonify({'msg': 'No dish menu found'})
