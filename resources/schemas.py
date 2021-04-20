@@ -73,5 +73,14 @@ class ConversationReplySchema(ma.Schema):
     class Meta:
         model = ConversationReply
         ordered = True
-        fields = ("id", "reply", "reply_time", "reply_user_id", "conv_id")
+        fields = ("id", "reply", "reply_time",
+                  "reply_user", "conv_id")
+    reply_user = ma.Nested('UserNestedSchema', many=False)
 
+
+class UserNestedSchema(ma.Schema):
+    class Meta:
+        model = User
+        ordered = True
+        fields = ("id", "email", "firstname", "surname",
+                  "sex", "active")
