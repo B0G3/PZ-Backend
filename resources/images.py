@@ -64,12 +64,7 @@ class ImagesApi(Resource):
         if file.filename == '':
             return jsonify({'msg': 'No selected file'})
         if file and allowed_file(file.filename):
-            #Nie wiem czy tak generowac link ale generuje uuid i sklejam to z id zeby miec pewnosc ze nigdy nie bedzie takiej samej nazwy
-            lastImg = Image.query.order_by(Image.id.desc()).first()
-            lastId = 1
-            if lastImg:
-                lastId = lastImg.id + 1
-            filename = str(uuid.uuid4()) + '-' + str(lastId) + '.' + file.filename.split(".")[-1]
+            filename = str(uuid.uuid4()) + '.' + file.filename.split(".")[-1]
 
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             url = url_for('static', filename="uploaded_images/"+filename)
@@ -141,7 +136,10 @@ class ImageApi(Resource):
 
         path = image.url
 
-        os.remove('.'+path)
+        try:
+            os.remove('.'+path)
+        except OSError:
+            pass
             
         db.session.delete(image)
         db.session.commit()

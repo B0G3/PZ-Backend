@@ -64,34 +64,21 @@ class NewsMApi(Resource):
         created_at = db.func.current_timestamp()
         updated_at = db.func.current_timestamp()
 
+        category = NewsCategory.query.get(category_id)
+        if not category:
+            return jsonify({'msg': 'News category does not exist'})
 
-        if(category_id>0):
-            category = NewsCategory.query.get(category_id)
-            if not category:
-                return jsonify({'msg': 'News category does not exist'})
-        else:
-            category_id = None
+        institution = Institution.query.get(institution_id)
+        if not institution:
+            return jsonify({'msg': 'Institution does not exist'})
 
-        if(institution_id>0):
-            institution = Institution.query.get(institution_id)
-            if not institution:
-                return jsonify({'msg': 'Institution does not exist'})
-        else:
-            institution_id = None
+        author = User.query.get(author_id)
+        if not author:
+            return jsonify({'msg': 'Author/User does not exist'})
 
-        if(author_id>0):
-            author = User.query.get(author_id)
-            if not author:
-                return jsonify({'msg': 'Author/User does not exist'})
-        else:
-            author_id = None
-
-        if(image_id>0):
-            image = Image.query.get(image_id)
-            if not image:
-                return jsonify({'msg': 'Image does not exist'})
-        else:
-            image_id = None
+        image = Image.query.get(image_id)
+        if not image:
+            return jsonify({'msg': 'Image does not exist'})
 
         new_news = News(title, details, status, view_count, created_at, updated_at, category_id, institution_id, author_id, image_id)
 
@@ -154,33 +141,21 @@ class NewsApi(Resource):
 
         updated_at = db.func.current_timestamp()
 
-        if(category_id>0):
-            category = NewsCategory.query.get(category_id)
-            if not category:
-                return jsonify({'msg': 'News category does not exist'})
-        else:
-            category_id = None
+        category = NewsCategory.query.get(category_id)
+        if not category:
+            return jsonify({'msg': 'News category does not exist'})
 
-        if(institution_id>0):
-            institution = Institution.query.get(institution_id)
-            if not institution:
-                return jsonify({'msg': 'Institution does not exist'})
-        else:
-            institution_id = None
+        institution = Institution.query.get(institution_id)
+        if not institution:
+            return jsonify({'msg': 'Institution does not exist'})
 
-        if(author_id>0):
-            author = User.query.get(author_id)
-            if not author:
-                return jsonify({'msg': 'Author/User does not exist'})
-        else:
-            author_id = None
+        author = User.query.get(author_id)
+        if not author:
+            return jsonify({'msg': 'Author/User does not exist'})
 
-        if(image_id>0):
-            image = Image.query.get(image_id)
-            if not image:
-                return jsonify({'msg': 'Image does not exist'})
-        else:
-            image_id = None
+        image = Image.query.get(image_id)
+        if not image:
+            return jsonify({'msg': 'Image does not exist'})
 
         news.title = title
         news.details = details
