@@ -96,7 +96,7 @@ class NewsSchema(ma.Schema):
     class Meta:
         model = News
         ordered = True
-        fields = ("title", "details", "status", "view_count", "created_at", "updated_at", "category_id", "institution_id", "author_id", "image_id")
+        fields = ("title", "details", "priority", "created_at", "updated_at", "category_id", "institution_id", "author_id")
 
 class NewsCategorySchema(ma.Schema):
     class Meta:
