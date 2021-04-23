@@ -131,6 +131,7 @@ class NewsApi(Resource):
         institution_id = request.json['institution_id']
         author_id = request.json['author_id']
 
+
         updated_at = db.func.current_timestamp()
 
         category = NewsCategory.query.get(category_id)
