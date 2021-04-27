@@ -1,6 +1,8 @@
 from flask import Response, request, jsonify, make_response, json
 from database.models import Conversation, User, ConversationReply
-from .schemas import ConversationSchema, ConversationReplySchema
+from .schemas import (
+    ConversationSchema, ConversationReplySchema, ConversationLastSchema
+)
 from database.db import db
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
@@ -11,8 +13,11 @@ from .swagger_models import Conversation as ConversationSwaggerModel
 from .swagger_models import ConversationReply as ConversationReplySwaggerModel
 from sqlalchemy import and_, or_
 
+import math
+
 conversation_schema = ConversationSchema()
 conversations_schema = ConversationSchema(many=True)
+conversations_last_schema = ConversationLastSchema(many=True)
 
 conversation_reply_schema = ConversationReplySchema()
 conversations_replies_schema = ConversationReplySchema(many=True)
@@ -27,6 +32,20 @@ class ConversationsApi(Resource):
                 'description': 'Successfully got all the conversations for logged user',
             }
         },
+        'parameters': [
+            {
+                'name': 'page',
+                'in': 'query',
+                'type': 'integer',
+                'description': '*Optional*: Which page to return'
+            },
+            {
+                'name': 'per_page',
+                'in': 'query',
+                'type': 'integer',
+                'description': '*Optional*: How many conversations to return per page'
+            },
+        ],
         'security': [
             {
                 'api_key': []
@@ -36,21 +55,79 @@ class ConversationsApi(Resource):
     @jwt_required()
     def get(self):
         """Return ALL the conversations for logged user"""
+
+        # TODO: Use get_jwt() instead (needed for unittesting)
         jwt_email = get_jwt_identity()
         current_user = User.query.filter_by(email=jwt_email).first()
+
+        total_conversations = Conversation.query.filter(
+            or_(Conversation.user_one == current_user.id,
+                Conversation.user_two == current_user.id)).count()
+
+        MIN_PER_PAGE = 5
+        MAX_PER_PAGE = 30
+
+        # Get query parameters
+        page = request.args.get('page')
+        per_page = request.args.get('per_page')
+
+        # If page is not provided, set to first page by default
+        if page is None or int(page) < 1:
+            page = 1
+
+        # Default pagination
+        if per_page is None:
+            per_page = 15
+
+        if int(per_page) < MIN_PER_PAGE:
+            per_page = MIN_PER_PAGE
+
+        if int(per_page) > MAX_PER_PAGE:
+            per_page = MAX_PER_PAGE
+
+        last_page = math.ceil(int(total_conversations) / int(per_page))
+
+        if int(page) >= last_page:
+            page = int(last_page)
+
+        page_offset = (int(page) - 1) * int(per_page)
+
         conversations = Conversation.query.filter(
-            or_(Conversation.user_one == current_user.id, Conversation.user_two == current_user.id))
+            or_(Conversation.user_one == current_user.id,
+                Conversation.user_two == current_user.id))
 
-        replies = []
+        conversations_query = Conversation.query.filter(
+            or_(Conversation.user_one == current_user.id,
+                Conversation.user_two == current_user.id)).offset(page_offset).limit(per_page).all()
 
-        for convo in conversations:
+        # Copying query to separate list, so we won't delete actual records
+        conversations_copy = []
+        for convo in conversations_query:
+            conversations_copy.append(convo)
+
+        # For each conversation we clear all the replies and leave out
+        # only the last one
+        for convo in conversations_copy:
             last_reply = ConversationReply.query.filter_by(
                 conv_id=convo.id).order_by(ConversationReply.reply_time.desc()).first()
+            convo.conversation_replies.clear()
 
+            # Don't insert None into the list
             if last_reply is not None:
-                replies.append(last_reply)
+                convo.conversation_replies.append(last_reply)
 
-        return conversations_replies_schema.jsonify(replies)
+        conversations_query_result = conversations_last_schema.dump(
+            conversations_copy)
+
+        result = {
+            "total": total_conversations,
+            "per_page": int(per_page),
+            "current_page": int(page),
+            "last_page": last_page,
+            "data": conversations_query_result
+        }
+
+        return jsonify(result)
 
     @swagger.doc({
         'tags': ['conversation'],

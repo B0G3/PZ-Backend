@@ -90,6 +90,9 @@ class Institution(db.Model):
     users = db.relationship(
         'User', cascade="all,delete", backref='institution')
 
+    groups = db.relationship(
+        'Group', cascade="all,delete", backref='institution')
+
     def __init__(self, name, city, address, contact_number):
         self.name = name
         self.city = city
@@ -104,9 +107,11 @@ class Group(db.Model):
                            default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=db.func.current_timestamp())
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
 
-    def __init__(self, name, created_at, updated_at):
+    def __init__(self, name, institution_id, created_at, updated_at):
         self.name = name
+        self.institution_id = institution_id
         self.created_at = created_at
         self.updated_at = updated_at
 
@@ -147,7 +152,6 @@ class Dish(db.Model):
     dishMenus = db.relationship(
         'DishMenu', cascade="all,delete", backref='Dish')
 
-
     def __init__(self, name, description, type, institution_id, is_alternative):
         self.name = name
         self.description = description
@@ -163,6 +167,9 @@ class Conversation(db.Model):
 
     conversation_replies = db.relationship('ConversationReply',
                                            backref='conversation', lazy=True)
+
+    user_two_obj = db.relationship(
+        'User', backref='conversationes2', foreign_keys=user_two, lazy=True)
 
     def __init__(self, user_one, user_two):
         self.user_one = user_one
@@ -227,8 +234,10 @@ class News(db.Model):
                            default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=db.func.current_timestamp())
-    category_id = db.Column(db.Integer, db.ForeignKey('news_category.id'), nullable=True)
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'), nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey(
+        'news_category.id'), nullable=True)
+    institution_id = db.Column(
+        db.Integer, db.ForeignKey('institution.id'), nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     def __init__(self, title, details, priority, created_at, updated_at, category_id, institution_id, author_id):
@@ -262,3 +271,4 @@ class Album(db.Model):
         self.updated_at = updated_at
         self.description = description
         self.institution_id = institution_id
+
