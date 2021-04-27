@@ -7,6 +7,7 @@ from .dishes import DishApi, DishesApi, DishMenuApi, DishMenusApi
 from .conversations import ConversationsApi, ConversationReplyApi, ConversationRepliesApi
 from .images import ImageApi, ImagesApi
 from .news import NewsApi, NewsMApi, NewsCategoryApi, NewsCategoriesApi
+from .albums import AlbumApi, AlbumsApi, AlbumImageApi, AlbumImagesApi
 
 def initialize_routes(api):
     api.add_resource(UsersApi, '/user')
@@ -48,3 +49,8 @@ def initialize_routes(api):
     api.add_resource(NewsApi, '/news/<id>')
     api.add_resource(NewsCategoryApi, '/newscategory/<id>')
     api.add_resource(NewsCategoriesApi, '/newscategory')
+
+    api.add_resource(AlbumsApi, '/album')
+    api.add_resource(AlbumApi, '/album/<id>')
+    api.add_resource(AlbumImagesApi, '/albumimage/<albumid>')
+    api.add_resource(AlbumImageApi, '/albumimage')

@@ -126,3 +126,10 @@ class UserTokenSchema(ma.Schema):
         fields = ("id", "email", "institution_id", "firstname", "surname",
                   "sex", "active", "roles")
     roles = ma.Nested('RoleSchema', many=True)
+
+
+class AlbumSchema(ma.Schema):
+    class Meta:
+        model = NewsCategory
+        ordered = True
+        fields = ("id", "name", "date", "created_at", "updated_at", "description", "institution_id")
