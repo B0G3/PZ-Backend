@@ -272,3 +272,24 @@ class Album(db.Model):
         self.description = description
         self.institution_id = institution_id
 
+
+class Attendance(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False)
+    present = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __init__(self, date, present, user_id):
+        self.date = date
+        self.present = present
+        self.user_id = user_id
+
+
+#class PickUpDelay(db.Model)
+#    id = db.Column(db.Integer, primary_key=True)
+#    is_delayed = db.Column(db.Integer, nullable=False)
+#    delay = db.Column(db.Time, nullable=False)
+
+#    def __init__(self, is_delayed, delay):
+#        self.is_delayed = is_delayed
+#        self.delay = delay

@@ -273,3 +273,22 @@ class AlbumImage(Schema):
     }
     required = ['image_id', 'album_id']
 
+class Attendance(Schema):
+    type = 'object'
+    description = 'Must provide these when adding attendance'
+    properties = {
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'present': {
+            'type': 'integer'
+        },
+        'user_id': {
+            'type': 'integer'
+        }
+    }
+    required = ['date', 'present', 'user_id']
+
+
+
