@@ -53,19 +53,15 @@ class NewsMApi(Resource):
         MIN_PER_PAGE = 5
         MAX_PER_PAGE = 30
 
-        # Get currently logged user's InstitutionId
         claims = get_jwt()
         user_institution_id = claims['institution_id']
 
-        # Get query parameters
         page = request.args.get('page')
         per_page = request.args.get('per_page')
 
-        # If page is not provided, set to first page by default
         if page is None or int(page) < 1:
             page = 1
 
-        # Default pagination
         if per_page is None:
             per_page = 15
 
