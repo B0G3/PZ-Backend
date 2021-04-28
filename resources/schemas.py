@@ -32,6 +32,14 @@ class UserGetSchema(ma.Schema):
     roles = ma.Nested('RoleSchema', many=True)
 
 
+class UserLookupSchema(ma.Schema):
+    class Meta:
+        model = User
+        ordered = True
+        fields = ("id", "email", "firstname", "surname",
+                  "sex", "institution_id")
+
+
 class InstitutionSchema(ma.Schema):
     class Meta:
         model = Institution
@@ -88,7 +96,7 @@ class ConversationLastSchema(ma.Schema):
     class Meta:
         model = Conversation
         ordered = True
-        fields = ("id", "user_one_obj", "user_two_obj", "conversation_replies")
+        fields = ("id", "user_two_obj", "conversation_replies")
 
     conversation_replies = ma.Nested(
         'ConversationReplyLastSchema', many=True, data_key='last_reply')

@@ -1,16 +1,18 @@
 from flask import Response, request, jsonify, make_response, json
 from database.models import Conversation, User, ConversationReply
 from .schemas import (
-    ConversationSchema, ConversationReplySchema, ConversationLastSchema
+    ConversationSchema, ConversationReplySchema, ConversationLastSchema,
+    UserLookupSchema
 )
 from database.db import db
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+    get_jwt_identity, get_jwt
 )
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import Conversation as ConversationSwaggerModel
 from .swagger_models import ConversationReply as ConversationReplySwaggerModel
+from .swagger_models import UserLookup as UserLookupSwaggerModel
 from sqlalchemy import and_, or_
 
 import math
@@ -21,6 +23,8 @@ conversations_last_schema = ConversationLastSchema(many=True)
 
 conversation_reply_schema = ConversationReplySchema()
 conversations_replies_schema = ConversationReplySchema(many=True)
+
+users_schema = UserLookupSchema(many=True)
 
 
 class ConversationsApi(Resource):
@@ -57,7 +61,9 @@ class ConversationsApi(Resource):
         """Return ALL the conversations for logged user"""
 
         # TODO: Use get_jwt() instead (needed for unittesting)
-        jwt_email = get_jwt_identity()
+        claims_jwt = get_jwt()
+        jwt_email = claims_jwt['email']
+
         current_user = User.query.filter_by(email=jwt_email).first()
 
         total_conversations = Conversation.query.filter(
@@ -104,6 +110,9 @@ class ConversationsApi(Resource):
         conversations_copy = []
         for convo in conversations_query:
             conversations_copy.append(convo)
+
+            if convo.user_two == current_user.id:
+                convo.user_two = convo.user_one
 
         # For each conversation we clear all the replies and leave out
         # only the last one
@@ -155,7 +164,8 @@ class ConversationsApi(Resource):
     @jwt_required()
     def post(self):
         """Add a new conversation for current user"""
-        jwt_email = get_jwt_identity()
+        claims_jwt = get_jwt()
+        jwt_email = claims_jwt['email']
         current_user = User.query.filter_by(email=jwt_email).first()
 
         user_one = current_user.id
@@ -170,6 +180,14 @@ class ConversationsApi(Resource):
         if does_exist is not None:
             return jsonify({'msg': 'Conversation already exists'})
 
+        user_two_exists = User.query.filter_by(id=user_two).first()
+
+        if not user_two_exists:
+            return jsonify({'msg': 'User with given id does not exist'})
+
+        if user_one == user_two:
+            return jsonify({'msg': 'Could not make conversation with the same user'})
+
         new_conversation = Conversation(user_one, user_two)
 
         db.session.add(new_conversation)
@@ -179,27 +197,6 @@ class ConversationsApi(Resource):
 
 
 class ConversationReplyApi(Resource):
-    @swagger.doc({
-        'tags': ['conversation_reply'],
-        'description': 'Returns ALL the conversations replies',
-        'responses': {
-            '200': {
-                'description': 'Successfully got all the conversations replies',
-            }
-        },
-        'security': [
-            {
-                'api_key': []
-            }
-        ]
-    })
-    @jwt_required()
-    def get(self):
-        """Return ALL the conversations replies"""
-        all_replies = ConversationReply.query.all()
-        result = conversations_replies_schema.dump(all_replies)
-        return jsonify(result)
-
     @swagger.doc({
         'tags': ['conversation_reply'],
         'description': 'Adds a new reply to the conversation',
@@ -226,7 +223,8 @@ class ConversationReplyApi(Resource):
     @jwt_required()
     def post(self):
         """Add a new conversation reply"""
-        jwt_email = get_jwt_identity()
+        claims_jwt = get_jwt()
+        jwt_email = claims_jwt['email']
         current_user = User.query.filter_by(email=jwt_email).first()
 
         reply = request.json['reply']
@@ -264,6 +262,18 @@ class ConversationRepliesApi(Resource):
                 'type': 'integer',
                 'required': 'true'
             },
+            {
+                'name': 'page',
+                'in': 'query',
+                'type': 'integer',
+                'description': '*Optional*: Which page to return'
+            },
+            {
+                'name': 'per_page',
+                'in': 'query',
+                'type': 'integer',
+                'description': '*Optional*: How many replies to return per page'
+            },
         ],
         'responses': {
             '200': {
@@ -279,11 +289,108 @@ class ConversationRepliesApi(Resource):
     @jwt_required()
     def get(self, conv_id):
         """Return ALL the replies in given conversation"""
+
+        total_replies = ConversationReply.query.filter(
+            ConversationReply.conv_id == conv_id).count()
+
+        MIN_PER_PAGE = 5
+        MAX_PER_PAGE = 30
+
+        # Get query parameters
+        page = request.args.get('page')
+        per_page = request.args.get('per_page')
+
+        # If page is not provided, set to first page by default
+        if page is None or int(page) < 1:
+            page = 1
+
+        # Default pagination
+        if per_page is None:
+            per_page = 15
+
+        if int(per_page) < MIN_PER_PAGE:
+            per_page = MIN_PER_PAGE
+
+        if int(per_page) > MAX_PER_PAGE:
+            per_page = MAX_PER_PAGE
+
+        last_page = math.ceil(int(total_replies) / int(per_page))
+
+        if int(page) >= last_page:
+            page = int(last_page)
+
+        page_offset = (int(page) - 1) * int(per_page)
+
         conversation = Conversation.query.filter_by(id=conv_id).first()
         if conversation is None:
             return jsonify({'msg': 'Conversation does not exist'})
 
-        replies = ConversationReply.query.filter_by(
-            conv_id=conv_id).order_by(ConversationReply.reply_time.desc()).all()
+        replies_query = ConversationReply.query.filter_by(
+            conv_id=conv_id).order_by(ConversationReply.reply_time.desc()).offset(page_offset).limit(per_page).all()
 
-        return conversations_replies_schema.jsonify(replies)
+        replies_query_result = conversations_replies_schema.dump(replies_query)
+
+        result = {
+            "total": total_replies,
+            "per_page": int(per_page),
+            "current_page": int(page),
+            "last_page": last_page,
+            "data": replies_query_result
+        }
+
+        return jsonify(result)
+
+
+class UserSearchApi(Resource):
+    @swagger.doc({
+        'tags': ['conversation'],
+        'description': 'Looks for users matching',
+        'parameters': [
+            {
+                'name': 'Body',
+                'in': 'body',
+                'schema': UserLookupSwaggerModel,
+                'type': 'object',
+                'required': 'true'
+            },
+        ],
+        'responses': {
+            '200': {
+                'description': 'Found matching user',
+            }
+        },
+        'security': [
+            {
+                'api_key': []
+            }
+        ]
+    })
+    @jwt_required()
+    def post(self):
+        """Search user by his firstname and surname"""
+
+        # Get currently logged user's InstitutionId
+        claims = get_jwt()
+        current_user_inst_id = claims['institution_id']
+
+        name_like = request.json['name_like']
+        user_list = []
+
+        search_result = db.session.query(User).filter(User.institution_id == current_user_inst_id).filter(
+            (User.firstname + ' ' + User.surname).like('{0}%'.format(name_like))).limit(10).all()
+
+        for u in search_result:
+            # We query user by u.id
+            user_query = User.query.filter(
+                User.id == u.id).filter(User.institution_id == current_user_inst_id).first()
+
+            # Append it to the list of users
+            user_list.append(user_query)
+
+        result = users_schema.dump(user_list)
+
+        # If we did not query any users, then there are no matching names
+        if not user_list:
+            return jsonify({"msg": "No matching names"})
+
+        return jsonify(result)

@@ -260,6 +260,7 @@ class Album(Schema):
     }
     required = ['date']
 
+
 class AlbumImage(Schema):
     type = 'object'
     description = 'Must provide these when adding image to an album'
@@ -272,6 +273,7 @@ class AlbumImage(Schema):
         },
     }
     required = ['image_id', 'album_id']
+
 
 class Attendance(Schema):
     type = 'object'
@@ -291,4 +293,26 @@ class Attendance(Schema):
     required = ['date', 'present', 'user_id']
 
 
+class PasswordChange(Schema):
+    type = 'object'
+    description = 'Must provide these when changing password'
+    properties = {
+        'password': {
+            'type': 'string'
+        },
+        'repeat_password': {
+            'type': 'string'
+        }
+    }
+    required = ['password', 'repeat_password']
 
+
+class UserLookup(Schema):
+    type = 'object'
+    description = 'Must provide when doing user lookup'
+    properties = {
+        'name_like': {
+            'type': 'string'
+        }
+    }
+    required = ['name_like']

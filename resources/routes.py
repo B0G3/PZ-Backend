@@ -1,17 +1,25 @@
-from .users import UserApi, UsersApi, LoginApi, ProtectedApi, RefreshTokenApi
+from .users import (
+    UserApi, UsersApi, LoginApi, ProtectedApi,
+    RefreshTokenApi, PasswordChangeApi
+)
 from .institutions import InstitutionsApi, InstitutionApi
 from .roles import RolesApi, RoleApi, UserRoleApi, UserRolesApi
 from .groups import GroupApi, GroupsApi, UserGroupsApi, UserGroupApi
 from .activities import ActivitiesApi, ActivityApi
 from .dishes import DishApi, DishesApi, DishMenuApi, DishMenusApi
-from .conversations import ConversationsApi, ConversationReplyApi, ConversationRepliesApi
+from .conversations import (
+    ConversationsApi, ConversationReplyApi, ConversationRepliesApi,
+    UserSearchApi
+)
 from .images import ImageApi, ImagesApi
 from .news import NewsApi, NewsMApi, NewsCategoryApi, NewsCategoriesApi
 from .albums import AlbumApi, AlbumsApi, AlbumImageApi, AlbumImagesApi
 from .attendance import AttendanceMApi, AttendanceApi
 
+
 def initialize_routes(api):
     api.add_resource(UsersApi, '/user')
+    api.add_resource(PasswordChangeApi, '/change_password')
     api.add_resource(UserApi, '/user/<id>')
 
     api.add_resource(InstitutionsApi, '/institution')
@@ -38,6 +46,7 @@ def initialize_routes(api):
     api.add_resource(ConversationsApi, '/conversation')
     api.add_resource(ConversationReplyApi, '/conversation_reply')
     api.add_resource(ConversationRepliesApi, '/conversation_reply/<conv_id>')
+    api.add_resource(UserSearchApi, '/search_user')
 
     api.add_resource(LoginApi, '/login')
     api.add_resource(RefreshTokenApi, '/refresh')
@@ -58,3 +67,4 @@ def initialize_routes(api):
 
     api.add_resource(AttendanceMApi, '/attendance')
     api.add_resource(AttendanceApi, '/attendance/<id>')
+
