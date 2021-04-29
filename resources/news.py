@@ -47,12 +47,14 @@ class NewsMApi(Resource):
     @jwt_required()
     def get(self):
         """Return ALL the news"""
+        claims = get_jwt()
+        user_institution_id = claims['institution_id']
+
+        news_total = News.query.filter(
+            News.institution_id == user_institution_id).count()
 
         MIN_PER_PAGE = 5
         MAX_PER_PAGE = 30
-
-        claims = get_jwt()
-        user_institution_id = claims['institution_id']
 
         page = request.args.get('page')
         per_page = request.args.get('per_page')
@@ -77,7 +79,6 @@ class NewsMApi(Resource):
         page_offset = (int(page) - 1) * int(per_page)
 
         news_query = News.query.filter(News.institution_id == user_institution_id).order_by(News.created_at.desc()).offset(
-
             page_offset).limit(per_page).all()
         query_result = newsM_schema.dump(news_query)
 
@@ -234,4 +235,3 @@ class NewsApi(Resource):
         db.session.commit()
 
         return jsonify({"msg": "Successfully deleted news"})
-
