@@ -316,3 +316,14 @@ class UserLookup(Schema):
         }
     }
     required = ['name_like']
+
+
+class RoleActivityLookup(Schema):
+    type = 'object'
+    description = 'Must provide when doing user lookup'
+    properties = {
+        'role': {
+            'type': 'string'
+        }
+    }
+    required = ['role']

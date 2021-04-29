@@ -5,7 +5,7 @@ from .users import (
 from .institutions import InstitutionsApi, InstitutionApi
 from .roles import RolesApi, RoleApi, UserRoleApi, UserRolesApi
 from .groups import GroupApi, GroupsApi, UserGroupsApi, UserGroupApi
-from .activities import ActivitiesApi, ActivityApi
+from .activities import ActivitiesApi, ActivityApi, RoleActivitiesApi
 from .dishes import DishApi, DishesApi, DishMenuApi, DishMenusApi
 from .conversations import (
     ConversationsApi, ConversationReplyApi, ConversationRepliesApi,
@@ -27,6 +27,7 @@ def initialize_routes(api):
 
     api.add_resource(ActivitiesApi, '/activity')
     api.add_resource(ActivityApi, '/activity/<id>')
+    api.add_resource(RoleActivitiesApi, '/role_activity')
 
     api.add_resource(RolesApi, '/role')
     api.add_resource(RoleApi, '/role/<id>')

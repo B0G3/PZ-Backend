@@ -285,11 +285,3 @@ class Attendance(db.Model):
         self.user_id = user_id
 
 
-#class PickUpDelay(db.Model)
-#    id = db.Column(db.Integer, primary_key=True)
-#    is_delayed = db.Column(db.Integer, nullable=False)
-#    delay = db.Column(db.Time, nullable=False)
-
-#    def __init__(self, is_delayed, delay):
-#        self.is_delayed = is_delayed
-#        self.delay = delay
