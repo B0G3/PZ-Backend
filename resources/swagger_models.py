@@ -58,8 +58,24 @@ class Institution(Schema):
         'contact_number': {
             'type': 'string'
         },
+        'admin_email': {
+            'type': 'string'
+        },
+        'admin_password': {
+            'type': 'string'
+        },
+        'admin_firstname': {
+            'type': 'string'
+        },
+        'admin_surname': {
+            'type': 'string'
+        },
+        'admin_sex': {
+            'type': 'integer'
+        },
     }
-    required = ['name', 'city', 'address', 'contact_number']
+    required = ['name', 'city', 'address', 'contact_number', 'admin_email',
+                'admin_password', 'admin_firstname', 'admin_surname', 'admin_sex']
 
 
 class Role(Schema):
@@ -215,29 +231,62 @@ class News(Schema):
         },
         'priority': {
             'type': 'boolean'
-        },
-        'category_id': {
-            'type': 'integer'
-        },
-        'institution_id': {
-            'type': 'integer'
-        },
-        'author_id': {
-            'type': 'integer'
         }
     }
     required = ['title', 'details', 'priority']
 
 
-class NewsCategory(Schema):
+class Album(Schema):
     type = 'object'
-    description = 'Must provide these when creating news category'
+    description = 'Must provide these when creating new album'
     properties = {
         'name': {
             'type': 'string'
+        },
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'description': {
+            'type': 'string',
+        },
+        'institution_id': {
+            'type': 'integer',
         }
     }
-    required = ['name']
+    required = ['date']
+
+
+class AlbumImage(Schema):
+    type = 'object'
+    description = 'Must provide these when adding image to an album'
+    properties = {
+        'image_id': {
+            'type': 'integer'
+        },
+        'album_id': {
+            'type': 'integer'
+        },
+    }
+    required = ['image_id', 'album_id']
+
+
+class Attendance(Schema):
+    type = 'object'
+    description = 'Must provide these when adding attendance'
+    properties = {
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'present': {
+            'type': 'integer'
+        },
+        'user_id': {
+            'type': 'integer'
+        }
+    }
+    required = ['date', 'present', 'user_id']
 
 
 class Album(Schema):
