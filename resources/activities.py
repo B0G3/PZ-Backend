@@ -1,5 +1,5 @@
 from flask import Response, request, jsonify, make_response, json
-from database.models import Activity, User, Role
+from database.models import Activity, User, Role, Group
 from .schemas import ActivitySchema
 from database.db import db
 from flask_jwt_extended import (
@@ -8,7 +8,7 @@ from flask_jwt_extended import (
 )
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import Activity as ActivitySwaggerModel
-from .swagger_models import RoleActivityLookup
+from .swagger_models import GroupActivityLookup
 
 activity_schema = ActivitySchema()
 activities_schema = ActivitySchema(many=True)
@@ -83,12 +83,12 @@ class ActivityApi(Resource):
 class RoleActivitiesApi(Resource):
     @swagger.doc({
         'tags': ['activity'],
-        'description': 'Looks for role activities within institution',
+        'description': 'Looks for group activities within institution',
         'parameters': [
             {
                 'name': 'Body',
                 'in': 'body',
-                'schema': RoleActivityLookup,
+                'schema': GroupActivityLookup,
                 'type': 'object',
                 'required': 'true'
             },
@@ -106,25 +106,32 @@ class RoleActivitiesApi(Resource):
     })
     @jwt_required()
     def post(self):
-        """Search activities by role"""
+        """Search child activities by group"""
 
         # Get currently logged user's InstitutionId
         claims = get_jwt()
         current_user_inst_id = claims['institution_id']
 
-        role_str = request.json['role']
+        role_str = "child"
+        group_str = request.json['group']
         activity_list = []
 
         role = Role.query.filter(Role.title == role_str).first()
+        group = Group.query.filter(Group.name == group_str).first()
 
         if not role:
-            return jsonify({'msg': 'Role doesnt exist'})
+            return jsonify({'msg': 'Child role doesnt exist'})
+
+        if not group:
+            return jsonify({'msg': 'Group doesnt exist'})
 
         activities = Activity.query.all()
         #Get users from user institution
         users = User.query.filter(User.institution_id == current_user_inst_id).all()
         #Get users with given role
         users = list(filter(lambda x: role in x.roles, users))
+        #Get users with given group
+        users = list(filter(lambda x: group in x.groups, users))
 
         #Get activities
         for u in activities:

@@ -367,12 +367,12 @@ class UserLookup(Schema):
     required = ['name_like']
 
 
-class RoleActivityLookup(Schema):
+class GroupActivityLookup(Schema):
     type = 'object'
     description = 'Must provide when doing user lookup'
     properties = {
-        'role': {
+        'group': {
             'type': 'string'
         }
     }
-    required = ['role']
+    required = ['group']
