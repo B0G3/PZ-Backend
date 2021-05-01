@@ -17,10 +17,10 @@ user_groups = db.Table('user_groups',
                            'user.id'), primary_key=True))
 
 image_has_album_image = db.Table('image_has_album_image',
-                       db.Column('image_id', db.Integer, db.ForeignKey(
-                           'image.id'), primary_key=True),
-                       db.Column('album_id', db.Integer, db.ForeignKey(
-                           'album.id'), primary_key=True))
+                                 db.Column('image_id', db.Integer, db.ForeignKey(
+                                     'image.id'), primary_key=True),
+                                 db.Column('album_id', db.Integer, db.ForeignKey(
+                                     'album.id'), primary_key=True))
 
 
 class Role(db.Model):
@@ -164,6 +164,10 @@ class Conversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_one = db.Column(db.Integer, db.ForeignKey('user.id'))
     user_two = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, nullable=False,
+                           default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, nullable=False,
+                           default=db.func.current_timestamp())
 
     conversation_replies = db.relationship('ConversationReply',
                                            backref='conversation', lazy=True)
@@ -171,9 +175,11 @@ class Conversation(db.Model):
     user_two_obj = db.relationship(
         'User', backref='conversationes2', foreign_keys=user_two, lazy=True)
 
-    def __init__(self, user_one, user_two):
+    def __init__(self, user_one, user_two, created_at, updated_at):
         self.user_one = user_one
         self.user_two = user_two
+        self.created_at = created_at
+        self.updated_at = updated_at
 
 
 class ConversationReply(db.Model):
@@ -201,14 +207,13 @@ class Image(db.Model):
                            default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=db.func.current_timestamp())
-    #albums = db.relationship('Album', secondary=image_has_album_image,
+    # albums = db.relationship('Album', secondary=image_has_album_image,
     #                        backref=db.backref('images', lazy='dynamic'))
 
     def __init__(self, url, created_at, updated_at):
         self.url = url
         self.created_at = created_at
         self.updated_at = updated_at
-
 
 
 class News(db.Model):
@@ -244,9 +249,10 @@ class Album(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=db.func.current_timestamp())
     description = db.Column(db.String(128), nullable=True)
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'), nullable=False)
+    institution_id = db.Column(db.Integer, db.ForeignKey(
+        'institution.id'), nullable=False)
     images = db.relationship('Image', secondary=image_has_album_image,
-                            backref=db.backref('albums', lazy='dynamic'))
+                             backref=db.backref('albums', lazy='dynamic'))
 
     def __init__(self, name, date, created_at, updated_at, description, institution_id):
         self.name = name
@@ -259,7 +265,7 @@ class Album(db.Model):
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.Date, nullable=False)
     present = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -269,7 +275,7 @@ class Attendance(db.Model):
         self.user_id = user_id
 
 
-#class PickUpDelay(db.Model)
+# class PickUpDelay(db.Model)
 #    id = db.Column(db.Integer, primary_key=True)
 #    is_delayed = db.Column(db.Integer, nullable=False)
 #    delay = db.Column(db.Time, nullable=False)
