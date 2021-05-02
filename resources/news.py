@@ -235,4 +235,3 @@ class NewsApi(Resource):
         db.session.commit()
 
         return jsonify({"msg": "Successfully deleted news"})
-

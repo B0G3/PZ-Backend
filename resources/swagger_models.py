@@ -283,6 +283,59 @@ class Attendance(Schema):
     required = ['date', 'present']
 
 
+class Album(Schema):
+    type = 'object'
+    description = 'Must provide these when creating new album'
+    properties = {
+        'name': {
+            'type': 'string'
+        },
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'description': {
+            'type': 'string',
+        },
+        'institution_id': {
+            'type': 'integer',
+        }
+    }
+    required = ['date']
+
+
+class AlbumImage(Schema):
+    type = 'object'
+    description = 'Must provide these when adding image to an album'
+    properties = {
+        'image_id': {
+            'type': 'integer'
+        },
+        'album_id': {
+            'type': 'integer'
+        },
+    }
+    required = ['image_id', 'album_id']
+
+
+class Attendance(Schema):
+    type = 'object'
+    description = 'Must provide these when adding attendance'
+    properties = {
+        'date': {
+            'type': 'string',
+            'format': 'date'
+        },
+        'present': {
+            'type': 'integer'
+        },
+        'user_id': {
+            'type': 'integer'
+        }
+    }
+    required = ['date', 'present', 'user_id']
+
+
 class PasswordChange(Schema):
     type = 'object'
     description = 'Must provide these when changing password'
@@ -306,3 +359,14 @@ class UserLookup(Schema):
         }
     }
     required = ['name_like']
+
+
+class GroupActivityLookup(Schema):
+    type = 'object'
+    description = 'Must provide when doing user lookup'
+    properties = {
+        'group': {
+            'type': 'string'
+        }
+    }
+    required = ['group']
