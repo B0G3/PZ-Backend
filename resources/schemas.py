@@ -96,7 +96,8 @@ class ConversationLastSchema(ma.Schema):
     class Meta:
         model = Conversation
         ordered = True
-        fields = ("id", "user_two_obj", "conversation_replies")
+        fields = ("id", "created_at", "updated_at",
+                  "user_two_obj", "conversation_replies")
 
     conversation_replies = ma.Nested(
         'ConversationReplyLastSchema', many=True, data_key='last_reply')
@@ -135,7 +136,7 @@ class ImageSchema(ma.Schema):
     class Meta:
         model = Image
         ordered = True
-        fields = ("id", "url", "created_at", "updated_at")
+        fields = ("id", "url", "institution_id", "created_at", "updated_at")
 
 
 class NewsSchema(ma.Schema):
@@ -159,7 +160,7 @@ class AlbumSchema(ma.Schema):
     class Meta:
         model = Album
         ordered = True
-        fields = ("id", "name", "date", "created_at",
+        fields = ("id", "name", "date", "img_count", "created_at",
                   "updated_at", "description", "institution_id")
 
 
@@ -169,3 +170,4 @@ class AttendanceSchema(ma.Schema):
         ordered = True
         fields = ("id", "date", "present", "user_id")
 
+    date = ma.DateTime('%Y-%m-%d')

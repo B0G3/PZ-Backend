@@ -249,9 +249,6 @@ class Album(Schema):
         },
         'description': {
             'type': 'string',
-        },
-        'institution_id': {
-            'type': 'integer',
         }
     }
     required = ['date']
@@ -281,12 +278,9 @@ class Attendance(Schema):
         },
         'present': {
             'type': 'integer'
-        },
-        'user_id': {
-            'type': 'integer'
         }
     }
-    required = ['date', 'present', 'user_id']
+    required = ['date', 'present']
 
 
 class Album(Schema):

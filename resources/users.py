@@ -91,8 +91,11 @@ class UsersApi(Resource):
         users_total = User.query.filter(
             User.institution_id == user_institution_id).count()
 
-        users_query = User.query.filter(User.institution_id == user_institution_id).offset(
-            page_offset).limit(per_page).all()
+        users_query = User.query\
+                .filter(User.institution_id == user_institution_id)\
+                .order_by(User.id.desc())\
+                .offset(page_offset)\
+                .limit(per_page).all()
         query_result = users_schema.dump(users_query)
 
         result = {
@@ -236,6 +239,11 @@ class UserApi(Resource):
 
         salt_str = generate_salt(16)
         key = generate_hash(password, salt_str)
+
+        # Check if new email already exists
+        does_exist = User.query.filter(User.email == email).first()
+        if does_exist is not None:
+            return jsonify({'msg': 'User with given email already exists'})
 
         user.email = email
         user.password = key
