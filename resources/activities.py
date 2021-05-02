@@ -80,7 +80,7 @@ class ActivityApi(Resource):
         return activity_schema.jsonify(activity)
 
 
-class RoleActivitiesApi(Resource):
+class GroupActivitiesApi(Resource):
     @swagger.doc({
         'tags': ['activity'],
         'description': 'Looks for group activities within institution',
@@ -112,7 +112,7 @@ class RoleActivitiesApi(Resource):
         claims = get_jwt()
         current_user_inst_id = claims['institution_id']
 
-        role_str = "child"
+        role_str = "Child"
         group_str = request.json['group']
         activity_list = []
 
