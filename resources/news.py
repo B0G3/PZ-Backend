@@ -183,24 +183,11 @@ class NewsApi(Resource):
         title = request.json['title']
         details = request.json['details']
         priority = request.json['priority']
-        institution_id = request.json['institution_id']
-        author_id = request.json['author_id']
-
         updated_at = db.func.current_timestamp()
-
-        institution = Institution.query.get(institution_id)
-        if not institution:
-            return jsonify({'msg': 'Institution does not exist'})
-
-        author = User.query.get(author_id)
-        if not author:
-            return jsonify({'msg': 'Author/User does not exist'})
 
         news.title = title
         news.details = details
         news.priority = priority
-        news.institution_id = institution_id
-        news.author_id = author_id
         news.updated_at = updated_at
 
         db.session.commit()
