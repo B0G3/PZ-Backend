@@ -1,5 +1,5 @@
 from flask import Response, request, jsonify, make_response, json
-from database.models import Dish, DishMenu, Institution, User
+from database.models import Dish, DishMenu, Institution
 from .schemas import DishSchema, DishMenuSchema
 from database.db import db
 from flask_jwt_extended import (
@@ -76,7 +76,7 @@ class DishesApi(Resource):
         dishes_total = Dish.query.filter(
             Dish.institution_id == user_institution_id).count()
 
-        dishes_query = User.query.filter(User.institution_id == user_institution_id).offset(
+        dishes_query = Dish.query.filter(Dish.institution_id == user_institution_id).offset(
             page_offset).limit(per_page).all()
         query_result = dishes_schema.dump(dishes_query)
 
