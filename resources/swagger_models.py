@@ -150,14 +150,11 @@ class DishMenu(Schema):
             'type': 'string',
             'format': 'date'
         },
-        'institution_id': {
-            'type': 'integer'
-        },
         'dish_id': {
             'type': 'integer'
         },
     }
-    required = ['date', 'institution_id', 'dish_id']
+    required = ['date', 'dish_id']
 
 
 class Dish(Schema):
@@ -258,14 +255,25 @@ class AlbumImage(Schema):
     type = 'object'
     description = 'Must provide these when adding image to an album'
     properties = {
-        'image_id': {
+        'album_id': {
             'type': 'integer'
         },
-        'album_id': {
+        'image_id': {
             'type': 'integer'
         },
     }
     required = ['image_id', 'album_id']
+
+
+class DeleteAlbumImage(Schema):
+    type = 'object'
+    description = 'Must provide these when adding image to an album'
+    properties = {
+        'album_id': {
+            'type': 'integer'
+        },
+    }
+    required = ['album_id']
 
 
 class Attendance(Schema):
@@ -370,3 +378,4 @@ class GroupActivityLookup(Schema):
         }
     }
     required = ['group']
+
