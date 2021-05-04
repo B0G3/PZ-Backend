@@ -157,14 +157,16 @@ class ActivityApi(Resource):
 class GroupActivitiesApi(Resource):
     @swagger.doc({
         'tags': ['activity'],
-        'description': 'Looks for group activities within institution',
+        'description': '''Return all the child activities in certain group. \
+                GET endpoint returns all activities for users with Child \
+                role and group name passed as a parameter. \
+                Params: \n \
+                \n * (Required) `group`: Group name''',
         'parameters': [
             {
-                'name': 'Body',
-                'in': 'body',
-                'schema': GroupActivityLookup,
-                'type': 'object',
-                'required': 'true'
+                'name': 'group',
+                'in': 'query',
+                'type': 'string'
             },
         ],
         'responses': {
@@ -179,7 +181,7 @@ class GroupActivitiesApi(Resource):
         ]
     })
     @jwt_required()
-    def post(self):
+    def get(self):
         """Search child activities by group"""
 
         # Get currently logged user's InstitutionId
@@ -187,7 +189,7 @@ class GroupActivitiesApi(Resource):
         current_user_inst_id = claims['institution_id']
 
         role_str = "Child"
-        group_str = request.json['group']
+        group_str = request.args.get('group')
         activity_list = []
 
         role = Role.query.filter(Role.title == role_str).first()
@@ -200,15 +202,14 @@ class GroupActivitiesApi(Resource):
             return jsonify({'msg': 'Group doesnt exist'})
 
         activities = Activity.query.all()
-        # Get users from user institution
-        users = User.query.filter(
-            User.institution_id == current_user_inst_id).all()
-        # Get users with given role
+        #Get users from user institution
+        users = User.query.filter(User.institution_id == current_user_inst_id).all()
+        #Get users with given role
         users = list(filter(lambda x: role in x.roles, users))
-        # Get users with given group
+        #Get users with given group
         users = list(filter(lambda x: group in x.groups, users))
 
-        # Get activities
+        #Get activities
         for u in activities:
             user = list(filter(lambda x: x.id == u.user_id, users))
             if(user):

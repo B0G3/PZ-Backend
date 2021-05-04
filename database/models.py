@@ -293,3 +293,4 @@ class Attendance(db.Model):
 #    def __init__(self, is_delayed, delay):
 #        self.is_delayed = is_delayed
 #        self.delay = delay
+

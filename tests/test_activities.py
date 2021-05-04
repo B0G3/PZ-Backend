@@ -131,3 +131,73 @@ class TestActivities(TestBase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(data, expected)
+
+    def test_get_child_activity_by_group(self):
+        user_data = {
+            "email": "another_one",
+            "password": "string",
+            "firstname": "string",
+            "surname": "string",
+            "sex": 0,
+            "active": 0
+        }
+        role_data = {
+            "title": "Child"
+        }
+        group_data = {
+            "name": "testgroup"
+        }
+        userrole_data = {
+            "role_id": 1,
+            "user_id": 2
+        }
+        usergroup_data = {
+            "group_id": 1,
+            "user_id": 2
+        }
+        self.app.post(
+            '/user',
+            data=json.dumps(user_data),
+            content_type='application/json',
+            headers=self.header
+        )
+        self.app.post(
+            '/role',
+            data=json.dumps(role_data),
+            content_type='application/json',
+            headers=self.header
+        )
+        self.app.post(
+            '/group',
+            data=json.dumps(group_data),
+            content_type='application/json',
+            headers=self.header
+        )
+        self.app.post(
+            '/userrole',
+            data=json.dumps(userrole_data),
+            content_type='application/json',
+            headers=self.header
+        )
+        self.app.post(
+            '/usergroup',
+            data=json.dumps(usergroup_data),
+            content_type='application/json',
+            headers=self.header
+        )
+
+        response = self.app.get(
+            '/group_activity?group=testgroup', headers=self.header)
+        data = json.loads(response.get_data(as_text=True))
+
+        expected = [
+            {
+                'id': 1,
+                'sleep': 0,
+                'food_scale': 0,
+                'user_id': 2,
+            }
+        ]
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(data, expected)

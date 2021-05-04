@@ -1,5 +1,5 @@
 from flask import Response, request, jsonify, make_response, json
-from database.models import Dish, DishMenu, Institution, User
+from database.models import Dish, DishMenu, Institution
 from .schemas import DishSchema, DishMenuSchema
 from database.db import db
 from flask_jwt_extended import (
@@ -27,20 +27,6 @@ class DishesApi(Resource):
                 'description': 'Successfully got all the dishes',
             }
         },
-        'parameters': [
-            {
-                'name': 'page',
-                'in': 'query',
-                'type': 'integer',
-                'description': '*Optional*: Which page to return'
-            },
-            {
-                'name': 'per_page',
-                'in': 'query',
-                'type': 'integer',
-                'description': '*Optional*: How many users to return per page'
-            },
-        ],
         'security': [
             {
                 'api_key': []
@@ -49,48 +35,12 @@ class DishesApi(Resource):
     })
     @jwt_required()
     def get(self):
-        """Return ALL the dishes"""
+        """Return all the dishes within institution"""
+        current_user_jwt = get_jwt()
+        current_user_institution_id = current_user_jwt['institution_id']
 
-        MIN_PER_PAGE = 5
-        MAX_PER_PAGE = 30
-
-        claims = get_jwt()
-        user_institution_id = claims['institution_id']
-
-        page = request.args.get('page')
-        per_page = request.args.get('per_page')
-
-        if page is None or int(page) < 1:
-            page = 1
-
-        if per_page is None:
-            per_page = 15
-
-        if int(per_page) < MIN_PER_PAGE:
-            per_page = MIN_PER_PAGE
-
-        if int(per_page) > MAX_PER_PAGE:
-            per_page = MAX_PER_PAGE
-
-        page_offset = (int(page) - 1) * int(per_page)
-
-        dishes_total = Dish.query.filter(
-            Dish.institution_id == user_institution_id).count()
-
-        dishes_query = Dish.query\
-            .filter(Dish.institution_id == user_institution_id)\
-            .offset(page_offset)\
-            .limit(per_page).all()
-        query_result = dishes_schema.dump(dishes_query)
-
-        result = {
-            "total": dishes_total,
-            "per_page": int(per_page),
-            "current_page": int(page),
-            "last_page": math.ceil(int(dishes_total) / int(per_page)),
-            "data": query_result
-        }
-
+        all_dishes = Dish.query.filter(Dish.institution_id == current_user_institution_id).all()
+        result = dishes_schema.dump(all_dishes)
         return jsonify(result)
 
     @swagger.doc({
@@ -182,7 +132,6 @@ class DishApi(Resource):
         name = request.json['name']
         description = request.json['description']
         type_str = request.json['type']
-        institution_id = request.json['institution_id']
         is_alternative = request.json['is_alternative']
 
         institution = Institution.query.get(institution_id)
@@ -192,7 +141,6 @@ class DishApi(Resource):
         dish.name = name
         dish.description = description
         dish.type = type_str
-        dish.institution_id = institution_id
         dish.is_alternative = is_alternative
 
         db.session.commit()
