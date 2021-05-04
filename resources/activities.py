@@ -86,11 +86,9 @@ class GroupActivitiesApi(Resource):
         'description': 'Looks for group activities within institution',
         'parameters': [
             {
-                'name': 'Body',
-                'in': 'body',
-                'schema': GroupActivityLookup,
-                'type': 'object',
-                'required': 'true'
+                'name': 'group',
+                'in': 'query',
+                'type': 'string'
             },
         ],
         'responses': {
@@ -105,7 +103,7 @@ class GroupActivitiesApi(Resource):
         ]
     })
     @jwt_required()
-    def post(self):
+    def get(self):
         """Search child activities by group"""
 
         # Get currently logged user's InstitutionId
@@ -113,7 +111,7 @@ class GroupActivitiesApi(Resource):
         current_user_inst_id = claims['institution_id']
 
         role_str = "Child"
-        group_str = request.json['group']
+        group_str = request.args.get('group')
         activity_list = []
 
         role = Role.query.filter(Role.title == role_str).first()
