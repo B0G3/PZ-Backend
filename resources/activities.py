@@ -157,7 +157,11 @@ class ActivityApi(Resource):
 class GroupActivitiesApi(Resource):
     @swagger.doc({
         'tags': ['activity'],
-        'description': 'Looks for group activities within institution',
+        'description': '''Return all the child activities in certain group. \
+                GET endpoint returns all activities for users with Child \
+                role and group name passed as a parameter. \
+                Params: \n \
+                \n * (Required) `group`: Group name''',
         'parameters': [
             {
                 'name': 'group',
