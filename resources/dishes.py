@@ -35,7 +35,11 @@ class DishesApi(Resource):
     })
     @jwt_required()
     def get(self):
-        all_dishes = Dish.query.all()
+        """Return all the dishes within institution"""
+        current_user_jwt = get_jwt()
+        current_user_institution_id = current_user_jwt['institution_id']
+
+        all_dishes = Dish.query.filter(Dish.institution_id == current_user_institution_id).all()
         result = dishes_schema.dump(all_dishes)
         return jsonify(result)
 
@@ -128,7 +132,6 @@ class DishApi(Resource):
         name = request.json['name']
         description = request.json['description']
         type_str = request.json['type']
-        institution_id = request.json['institution_id']
         is_alternative = request.json['is_alternative']
 
         institution = Institution.query.get(institution_id)
@@ -138,7 +141,6 @@ class DishApi(Resource):
         dish.name = name
         dish.description = description
         dish.type = type_str
-        dish.institution_id = institution_id
         dish.is_alternative = is_alternative
 
         db.session.commit()

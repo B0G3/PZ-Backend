@@ -170,14 +170,11 @@ class Dish(Schema):
         'type': {
             'type': 'string'
         },
-        'institution_id': {
-            'type': 'integer'
-        },
         'is_alternative': {
             'type': 'integer'
         }
     }
-    required = ['name', 'type', 'institution_id', 'is_alternative']
+    required = ['name', 'type', 'is_alternative']
 
 
 class Conversation(Schema):
