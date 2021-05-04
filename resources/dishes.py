@@ -27,20 +27,6 @@ class DishesApi(Resource):
                 'description': 'Successfully got all the dishes',
             }
         },
-        'parameters': [
-            {
-                'name': 'page',
-                'in': 'query',
-                'type': 'integer',
-                'description': '*Optional*: Which page to return'
-            },
-            {
-                'name': 'per_page',
-                'in': 'query',
-                'type': 'integer',
-                'description': '*Optional*: How many users to return per page'
-            },
-        ],
         'security': [
             {
                 'api_key': []
@@ -49,48 +35,8 @@ class DishesApi(Resource):
     })
     @jwt_required()
     def get(self):
-        """Return ALL the dishes"""
-
-        MIN_PER_PAGE = 5
-        MAX_PER_PAGE = 30
-
-        claims = get_jwt()
-        user_institution_id = claims['institution_id']
-
-        page = request.args.get('page')
-        per_page = request.args.get('per_page')
-
-        if page is None or int(page) < 1:
-            page = 1
-
-        if per_page is None:
-            per_page = 15
-
-        if int(per_page) < MIN_PER_PAGE:
-            per_page = MIN_PER_PAGE
-
-        if int(per_page) > MAX_PER_PAGE:
-            per_page = MAX_PER_PAGE
-
-        page_offset = (int(page) - 1) * int(per_page)
-
-        dishes_total = Dish.query.filter(
-            Dish.institution_id == user_institution_id).count()
-
-        dishes_query = Dish.query\
-            .filter(Dish.institution_id == user_institution_id)\
-            .offset(page_offset)\
-            .limit(per_page).all()
-        query_result = dishes_schema.dump(dishes_query)
-
-        result = {
-            "total": dishes_total,
-            "per_page": int(per_page),
-            "current_page": int(page),
-            "last_page": math.ceil(int(dishes_total) / int(per_page)),
-            "data": query_result
-        }
-
+        all_dishes = Dish.query.all()
+        result = dishes_schema.dump(all_dishes)
         return jsonify(result)
 
     @swagger.doc({
