@@ -18,10 +18,19 @@ newsM_schema = NewsSchema(many=True)
 class NewsMApi(Resource):
     @swagger.doc({
         'tags': ['news'],
-        'description': 'Returns ALL the news',
+        'description': '''Endpoint returning all the news in an institution\
+                that currently logged in user belongs to. By default it is \
+                being sorted by descending date. You can optionally set \
+                priority flag which will sort news by priority first, then \
+                date. So all news with priority flag **true** will be on the \
+                top. \n News are paginated (per_page=15 by default). You \
+                need to show at least 5 news per page and up to 30 per page.''',
         'responses': {
             '200': {
                 'description': 'Successfully got all the news',
+            },
+            '401': {
+                'description': 'Unauthorized request',
             }
         },
         'parameters': [
@@ -37,6 +46,12 @@ class NewsMApi(Resource):
                 'type': 'integer',
                 'description': '*Optional*: How many users to return per page'
             },
+            {
+                'name': 'priority',
+                'in': 'query',
+                'type': 'boolean',
+                'description': '*Optional*: Sort by priority'
+            },
         ],
         'security': [
             {
@@ -49,6 +64,8 @@ class NewsMApi(Resource):
         """Return ALL the news"""
         claims = get_jwt()
         user_institution_id = claims['institution_id']
+
+        priority = request.args.get('priority')
 
         news_total = News.query.filter(
             News.institution_id == user_institution_id).count()
@@ -78,8 +95,17 @@ class NewsMApi(Resource):
 
         page_offset = (int(page) - 1) * int(per_page)
 
-        news_query = News.query.filter(News.institution_id == user_institution_id).order_by(News.created_at.desc()).offset(
-            page_offset).limit(per_page).all()
+        news_query = News.query\
+            .filter(News.institution_id == user_institution_id)\
+            .order_by(News.created_at.desc())\
+            .offset(page_offset).limit(per_page).all()
+
+        if priority == 'true':
+            news_query = News.query\
+                .filter(News.institution_id == user_institution_id)\
+                .order_by(News.priority.desc(), News.created_at.desc())\
+                .offset(page_offset).limit(per_page).all()
+
         query_result = newsM_schema.dump(news_query)
 
         result = {
@@ -107,6 +133,9 @@ class NewsMApi(Resource):
         'responses': {
             '200': {
                 'description': 'Successfully added new news',
+            },
+            '401': {
+                'description': 'Unauthorized request',
             }
         },
         'security': [
@@ -151,7 +180,10 @@ class NewsMApi(Resource):
 class NewsApi(Resource):
     @swagger.doc({
         'tags': ['news'],
-        'description': 'Updates an news',
+        'description': '''An endpoint used to change given news. \n \
+                Providing an **id** in path is required. Also please \
+                note that you can only change news in an institution \
+                that logged user belongs to.''',
         'parameters': [
             {
                 'name': 'Body',
@@ -171,14 +203,26 @@ class NewsApi(Resource):
             '200': {
                 'description': 'Successfully updated a news',
             }
-        }
+        },
+        'security': [
+            {
+                'api_key': []
+            }
+        ]
     })
+    @jwt_required()
     def put(self, id):
-        """Update news"""
+        """Update news by its id"""
+        claims = get_jwt()
+        user_institution_id = claims['institution_id']
+
         news = News.query.get(id)
 
         if not news:
             return jsonify({'msg': 'No news found'})
+
+        if news.institution_id != user_institution_id:
+            return jsonify({'msg': 'News being updated does not belong to the institution of currently logged in User'})
 
         title = request.json['title']
         details = request.json['details']
@@ -195,7 +239,10 @@ class NewsApi(Resource):
 
     @swagger.doc({
         'tags': ['news'],
-        'description': 'Deletes a news',
+        'description': '''An endpoint providing ability to delete news by \
+                their IDs (provided in **path**). Also please note that you \
+                can only delete news in an institution that logged user \
+                belongs to.''',
         'parameters': [
             {
                 'name': 'id',
@@ -210,15 +257,33 @@ class NewsApi(Resource):
         'responses': {
             '200': {
                 'description': 'Successfully deleted news',
+            },
+            '401': {
+                'description': 'Unauthorized request',
             }
-        }
+        },
+        'security': [
+            {
+                'api_key': []
+            }
+        ]
     })
+    @jwt_required()
     def delete(self, id):
-        """Delete news"""
+        """Delete news by its id"""
+        claims = get_jwt()
+        user_institution_id = claims['institution_id']
+
         news = db.session.query(News).filter(News.id == id).first()
+
         if not news:
             return jsonify({'msg': 'No news found'})
+
+        if news.institution_id != user_institution_id:
+            return jsonify({'msg': 'News being deleted does not belong to the institution of currently logged in User'})
+
         db.session.delete(news)
         db.session.commit()
 
         return jsonify({"msg": "Successfully deleted news"})
+
