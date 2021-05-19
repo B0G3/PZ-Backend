@@ -4,7 +4,7 @@ from .schemas import RoleSchema
 from database.db import db
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+    get_jwt_identity, get_jwt
 )
 from flask_restful_swagger_2 import Api, swagger, Resource, Schema
 from .swagger_models import Role as RoleSwaggerModel
